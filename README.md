@@ -35,3 +35,8 @@ $ ./gcpclient instance list {project_id} {zone}
 ```sh
 $ ./gcpclient instance get {project_id} {zone} {instance}
 ```
+
+建立一個基本的 `debian-8` instance：
+```sh
+$ ./gcpclient instance create {project_id} {zone} {instance_id}
+```
