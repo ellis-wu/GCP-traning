@@ -22,7 +22,9 @@ GCP APIs example.
 
 ## Starting
 
-> 請以管理者權限進行操作！
+__*請以管理者權限進行操作！*__
+
+> 若遇到 `Google Application Default Credentials` 問題，請參考：[Google Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials)
 
 顯示專案中所有 instance 的資訊：
 ```sh
