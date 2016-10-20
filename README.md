@@ -23,10 +23,12 @@ GCP APIs example.
 * [project operation](#project-operation)
   * [list](#list)
   * [create](#create)
+  * [delete](#delete)
 * [instance operation](#instance-operation)
   * [list](#list-1)
   * [get](#get)
   * [create](#create-1)
+  * [delete](#delete-1)
 
 > * __*請以管理者權限進行操作！*__
 > * 若遇到 `Google Application Default Credentials` 問題，請參考：[Google Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials)
@@ -48,6 +50,14 @@ $ ./gcpclient project create {project name} {project ID}
 
 > project_id 必須是唯一，不可重複。
 
+### delete
+刪除 project：
+```sh
+$ ./gcpclient project delete {project ID}
+```
+
+> Shutting down a project does not delete the project immediately and only requests deleting the project. The project will be deleted at some later time. For more information see the [Overview page](https://cloud.google.com/resource-manager/docs/overview#project_deletion).
+
 ## instance operation
 
 GCP instance 相關操作
@@ -68,4 +78,10 @@ $ ./gcpclient instance get {project_id} {zone} {instance}
 建立一個基本的 `debian-8` instance：
 ```sh
 $ ./gcpclient instance create {project_id} {zone} {instance_id}
+```
+
+### delete
+刪除 Project 中已存在的 instance：
+```sh
+$ ./gcpclient instance delete {project_id} {zone} {instance_id}
 ```

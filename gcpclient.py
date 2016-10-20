@@ -172,9 +172,18 @@ def project_create(name, project_id):
         sys.exit("create project fail.")
 
 
+def project_delete(project_id):
+    try:
+        request = gcp_credential('cloudresourcemanager').projects()
+        response = request.delete(projectId=project_id).execute()
+        print("delete [%s] success" % project_id)
+    except:
+        sys.exit("delete prject fail")
+
+
 def gcp_project():
     if len(sys.argv) < 3:
-        sys.exit('Usage: gcpclient project {list|create}')
+        sys.exit('Usage: gcpclient project {list|create|delete}')
     else:
         if sys.argv[2] == 'list':
             if len(sys.argv) != 3:
@@ -188,12 +197,23 @@ def gcp_project():
             if len(sys.argv) != 5:
                 message_alert(
                     "Usage: gcpclient project create {project name} {project ID}",
-                    "list all project infomation"
+                    "create project"
                 )
             else:
                 name = sys.argv[3]
                 project_id = sys.argv[4]
                 project_create(name, project_id)
+        elif sys.argv[2] == 'delete':
+            if len(sys.argv) != 4:
+                message_alert(
+                    "Usage: gcpclient project delete {project ID}",
+                    "delete project"
+                )
+            else:
+                project_id = sys.argv[3]
+                project_delete(project_id)
+        else:
+            sys.exit('Usage: gcpclient project {list|create|delete}')
 
 
 def message_alert(usage, description):
