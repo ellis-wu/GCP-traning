@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import json
 import sys
+import magic
 from googleapiclient import discovery
+from googleapiclient import http
 from oauth2client.client import GoogleCredentials
 
 # project id = test-project-146302
@@ -159,10 +161,10 @@ def project_list():
         sys.exit("get project list fail.")
 
 
-def project_create(name, project_id):
+def project_create(name, project):
     try:
         config = {
-            'project_id': project_id,
+            'project_id': project,
             'name': name
         }
         request = gcp_credential('cloudresourcemanager').projects()
@@ -172,11 +174,11 @@ def project_create(name, project_id):
         sys.exit("create project fail.")
 
 
-def project_delete(project_id):
+def project_delete(project):
     try:
         request = gcp_credential('cloudresourcemanager').projects()
-        response = request.delete(projectId=project_id).execute()
-        print("delete [%s] success" % project_id)
+        response = request.delete(projectId=project).execute()
+        print("delete [%s] success" % project)
     except:
         sys.exit("delete prject fail")
 
@@ -201,8 +203,8 @@ def gcp_project():
                 )
             else:
                 name = sys.argv[3]
-                project_id = sys.argv[4]
-                project_create(name, project_id)
+                project = sys.argv[4]
+                project_create(name, project)
         elif sys.argv[2] == 'delete':
             if len(sys.argv) != 4:
                 message_alert(
@@ -210,10 +212,168 @@ def gcp_project():
                     "delete project"
                 )
             else:
-                project_id = sys.argv[3]
-                project_delete(project_id)
+                project = sys.argv[3]
+                project_delete(project)
         else:
             sys.exit('Usage: gcpclient project {list|create|delete}')
+
+
+def gs_bucket_list(project):
+    try:
+        request = gcp_credential('storage').buckets()
+        response = request.list(project=project).execute()
+        encodedjson =  json.dumps(response, sort_keys=True, indent=4)
+        print encodedjson
+    except:
+        sys.exit('list bucket fail.')
+
+
+def gs_bucket_get(bucket):
+    try:
+        request = gcp_credential('storage').buckets()
+        response = request.get(bucket=bucket).execute()
+        encodedjson =  json.dumps(response, sort_keys=True, indent=4)
+        print encodedjson
+    except:
+        sys.exit('get bucket fail')
+
+
+def gs_bucket_create(project, bucket):
+    try:
+        config = {
+            'name': bucket
+        }
+        request = gcp_credential('storage').buckets()
+        response = request.insert(project=project, body=config).execute()
+        print("create [%s] bucket success" % bucket)
+    except:
+        sys.exit('create bucket fail')
+
+
+def gs_bucket_delete(bucket):
+    try:
+        request = gcp_credential('storage').buckets()
+        response = request.delete(bucket=bucket).execute()
+        print("delete [%s] bucket success" % bucket)
+    except:
+        sys.exit('delete bucket fail')
+
+
+def gs_bucket():
+    if len(sys.argv) < 3:
+        sys.exit('Usage: gcpclient bucket {list|get|create|delete}')
+    else:
+        if sys.argv[2] == 'list':
+            if len(sys.argv) != 4:
+                message_alert(
+                    "Usage: gcpclient bucket list {project ID}",
+                    "list project all bucket information"
+                )
+            else:
+                project = sys.argv[3]
+                gs_bucket_list(project)
+        elif sys.argv[2] == 'get':
+            if len(sys.argv) != 4:
+                message_alert(
+                    "Usage: gcpclient bucket get {bucket}",
+                    "list bucket information"
+                )
+            else:
+                bucket = sys.argv[3]
+                gs_bucket_get(bucket)
+        elif sys.argv[2] == 'create':
+            if len(sys.argv) != 5:
+                message_alert(
+                    "Usage: gcpclient bucket create {project ID} {bucket}",
+                    "create bucket"
+                )
+            else:
+                project = sys.argv[3]
+                bucket = sys.argv[4]
+                gs_bucket_create(project, bucket)
+        elif sys.argv[2] == 'delete':
+            if len(sys.argv) != 4:
+                message_alert(
+                    "Usage: gcpclient bucket delete {bucket}",
+                    "delete bucket"
+                )
+            else:
+                bucket = sys.argv[3]
+                gs_bucket_delete(bucket)
+        else:
+            sys.exit('Usage: gcpclient bucket {list|get|create|delete}')
+
+
+def gs_object_list(bucket):
+    try:
+        request = gcp_credential('storage').objects()
+        response = request.list(bucket=bucket).execute()
+        encodedjson =  json.dumps(response, sort_keys=True, indent=4)
+        print encodedjson
+    except:
+        sys.exit('list fail.')
+
+def gs_object_upload(bucket, file, filename):
+    try:
+        body = {
+            'name': filename,
+        }
+        mime = magic.Magic(mime=True)
+        fileType = mime.from_file(file)
+        with open(file, 'rb') as f:
+            request = gcp_credential('storage').objects()
+            response = request.insert(bucket=bucket, body=body,
+                                      media_body=http.MediaIoBaseUpload(f, fileType)).execute()
+        print("upload [%s] to [%s] success" % (filename, bucket))
+    except:
+        sys.exit('upload file fail')
+
+
+def gs_object_delete(bucket, object):
+    try:
+        request = gcp_credential('storage').objects()
+        response = request.delete(bucket=bucket, object=object).execute()
+        print("delete [%s] success" % object)
+    except:
+        sys.exit("delete object fail")
+
+
+def gs_object():
+    if len(sys.argv) < 3:
+        sys.exit('Usage: gcpclient object {list|upload|delete}')
+    else:
+        if sys.argv[2] == 'list':
+            if len(sys.argv) != 4:
+                message_alert(
+                    "Usage: gcpclient object list {bucket}",
+                    "list bucket all object information"
+                )
+            else:
+                bucket = sys.argv[3]
+                gs_object_list(bucket)
+        elif sys.argv[2] == 'upload':
+            if len(sys.argv) != 6:
+                message_alert(
+                    "Usage: gcpclient object upload {bucket} {file path} {file name}",
+                    "upload file to bucket"
+                )
+            else:
+                bucket = sys.argv[3]
+                file_path = sys.argv[4]
+                file_name = sys.argv[5]
+                gs_object_upload(bucket, file_path, file_name)
+        elif sys.argv[2] == 'delete':
+            if len(sys.argv) != 5:
+                message_alert(
+                    "Usage: gcpclient object delete {bucket} {file name}",
+                    "delete object file"
+                )
+            else:
+                bucket = sys.argv[3]
+                file_name = sys.argv[4]
+                gs_object_delete(bucket, file_name)
+        else:
+            sys.exit('Usage: gcpclient object {list|upload|delete}')
 
 
 def message_alert(usage, description):
@@ -225,12 +385,18 @@ def message_alert(usage, description):
 
 def main():
     if len(sys.argv) < 2:
-        sys.exit('Usage: gcpclient {instance|project}')
+        sys.exit('Usage: gcpclient {instance|project|bucket|object}')
     else:
         if sys.argv[1] == 'instance':
             gcp_instance()
         elif sys.argv[1] == 'project':
             gcp_project()
+        elif sys.argv[1] == 'bucket':
+            gs_bucket()
+        elif sys.argv[1] == 'object':
+            gs_object()
+        else:
+            sys.exit('Usage: gcpclient {instance|project|bucket|object}')
 
 
 if __name__ == '__main__':

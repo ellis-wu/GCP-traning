@@ -19,6 +19,11 @@ GCP APIs example.
    $ pip install --upgrade google-api-python-client
    ```
 
+4. Install the Python library Magic
+   ```sh
+  $ pip install python-magic
+   ```
+
 ## Starting
 * [project operation](#project-operation)
   * [list](#list)
@@ -29,6 +34,15 @@ GCP APIs example.
   * [get](#get)
   * [create](#create-1)
   * [delete](#delete-1)
+* [bucket operation](#bucket-operation)
+  * [list](#list-2)
+  * [get](#get-1)
+  * [create](#create-2)
+  * [delete](#delete-2)
+* [object operation](#object-operation)
+  * [list](#list-3)
+  * [upload](#upload)
+  * [delete](#delete-3)
 
 > * __*請以管理者權限進行操作！*__
 > * 若遇到 `Google Application Default Credentials` 問題，請參考：[Google Application Default Credentials](https://developers.google.com/identity/protocols/application-default-credentials)
@@ -84,4 +98,52 @@ $ ./gcpclient instance create {project_id} {zone} {instance_id}
 刪除 Project 中已存在的 instance：
 ```sh
 $ ./gcpclient instance delete {project_id} {zone} {instance_id}
+```
+
+## bucket operation
+Cloud Storage bucket 相關操作
+
+### list
+顯示專案中所有 bucket 的資訊：
+```sh
+$ ./gcpclient bucket list {project ID}
+```
+
+### get
+取得 bucket 的資訊：
+```sh
+$ ./gcpclient bucket get {bucket}
+```
+
+### create
+建立一個新的 bucket：
+```sh
+$ ./gcpclient bucket create {project ID} {bucket}
+```
+
+### delete
+刪除 bucket：
+```sh
+$ ./gcpclient bucket delete {bucket}
+```
+
+## object operation
+Cloud Storage object 相關操作
+
+### list
+顯示 bucket 中所有 object 的資訊：
+```sh
+$ ./gcpclient object list {bucket}
+```
+
+### upload
+上傳 object 至指定 bucket 中：
+```sh
+$ ./gcpclient object upload {bucket} {file path} {file name}
+```
+
+### delete
+刪除指定 bucket 中的 object：
+```sh
+$ ./gcpclient object delete {bucket} {file name}
 ```
